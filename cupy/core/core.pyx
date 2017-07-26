@@ -1551,10 +1551,13 @@ cdef class ndarray:
                 arr.dtype, self.dtype))
         if self.shape != arr.shape:
             raise ValueError('Shape mismatch')
-        if not self._c_contiguous:
+        if self._c_contiguous:
+            arr = numpy.ascontiguousarray(arr)
+        elif self._f_contiguous:
+            arr = numpy.asfortranarray(arr)
+        else:
             raise RuntimeError('Cannot set to non-contiguous array')
 
-        arr = numpy.ascontiguousarray(arr)
         ptr = arr.ctypes.get_as_parameter()
         if stream is None:
             self.data.copy_from_host(ptr, self.nbytes)
